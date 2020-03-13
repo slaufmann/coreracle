@@ -25,7 +25,9 @@ func main() {
 	quitSig := make(chan bool)
 
 	// register handler functions
-//	client.HandleFunc(irc.DISCONNECTED, quitOnDisconnect)
+	client.HandleFunc(irc.DISCONNECTED,
+						func (conn *irc.Conn, line *irc.Line) { quitSig <- true })
+	client.HandleFunc(irc.CONNECTED, joinOnConnect)
 
 	// connect!
 	if err := client.Connect(); err != nil {
@@ -36,11 +38,8 @@ func main() {
 	<-quitSig
 }
 
-//func quitOnDisconnect(conn *irc.Conn, line *irc.Line) {
-//	quitSig <- true
-//}
-
 func joinOnConnect(conn *irc.Conn, line *irc.Line) {
+	fmt.Printf(conn.String())
 	channelArg := "#afra"
 	conn.Join(channelArg)
 }
