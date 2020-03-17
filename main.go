@@ -45,6 +45,7 @@ func main() {
 	client.HandleFunc(irc.DISCONNECTED,
 						func (conn *irc.Conn, line *irc.Line) { quitSig <- true })
 	client.HandleFunc(irc.CONNECTED, joinOnConnect)
+	client.HandleFunc(irc.PRIVMSG, handlePrivMsg)
 
 	// connect!
 	if err := client.Connect(); err != nil {
@@ -59,4 +60,8 @@ func joinOnConnect(conn *irc.Conn, line *irc.Line) {
 	fmt.Printf(conn.String())
 	channelArg := "#botwar"
 	conn.Join(channelArg)
+}
+
+func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
+	fmt.Printf("%s\n", line.Text())
 }
