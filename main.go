@@ -20,6 +20,8 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"strings"
+
 	irc "github.com/fluffle/goirc/client"
 )
 
@@ -63,12 +65,23 @@ func joinOnConnect(conn *irc.Conn, line *irc.Line) {
 }
 
 func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
+	text := line.Text()
+	strPart := strings.Split(text, ":")
+	if (len(strPart[0]) != len(text)) {
+		fmt.Printf("Someone was highlighted, maybe.\n")
+		nickStruct := conn.Me()
+		nick := nickStruct.Nick
+		if (strPart[0] == nick) {
+			fmt.Printf("It's us!\n")
+		}
+	}
+
 	if line.Public() {
-		fmt.Printf("Public message: %s\n",line.Text())
-		replyToMsg(conn, line.Target(), line.Text())
+		fmt.Printf("Public message: %s\n",text)
+		replyToMsg(conn, line.Target(), text)
 	} else {
-		fmt.Printf("Private message: %s\n", line.Text())
-		replyToMsg(conn, line.Target(), line.Text())
+		fmt.Printf("Private message: %s\n", text)
+		replyToMsg(conn, line.Target(), text)
 	}
 }
 
