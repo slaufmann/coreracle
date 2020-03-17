@@ -63,5 +63,16 @@ func joinOnConnect(conn *irc.Conn, line *irc.Line) {
 }
 
 func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
-	fmt.Printf("%s\n", line.Text())
+	if line.Public() {
+		fmt.Printf("Public message: %s\n",line.Text())
+		replyToMsg(conn, line.Target(), line.Text())
+	} else {
+		fmt.Printf("Private message: %s\n", line.Text())
+		replyToMsg(conn, line.Target(), line.Text())
+	}
+}
+
+func replyToMsg(conn *irc.Conn, target string, text string) {
+	fmt.Printf("Replying with message: %s\n", text)
+	conn.Privmsg(target, text)
 }
