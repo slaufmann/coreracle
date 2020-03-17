@@ -57,6 +57,6 @@ func main() {
 
 func joinOnConnect(conn *irc.Conn, line *irc.Line) {
 	fmt.Printf(conn.String())
-	channelArg := "#afra"
+	channelArg := "#botwar"
 	conn.Join(channelArg)
 }
