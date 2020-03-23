@@ -20,21 +20,59 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"os"
 	"strings"
 
 	irc "github.com/fluffle/goirc/client"
+	"github.com/akamensky/argparse"
 )
 
+type options struct {	nick string
+						channel string
+						server string
+						port string
+					}
+
+var opts = options{	nick: "coreracleBot",
+					channel: "#botwar",
+					server: "irc.freenode.net",
+					port: "7000"}
+
 func main() {
-	nickArg := "coreracleBot"
-	serverArg := "irc.freenode.net"
-	portArg := "7000"
+	// parse command line arguments
+	parser := argparse.NewParser("coreracle", "Helpful IRC bot that can tell you the future based on coredumps and stacktraces.")
+	var nickArg *string = parser.String("n", "nickname",
+											&argparse.Options{Required: false, Help: "nick with which the bot joins a channel"})
+	var chanArg *string = parser.String("c", "channel",
+											&argparse.Options{Required: false, Help: "channel the bot should join"})
+	var serverArg *string = parser.String("s", "server",
+											&argparse.Options{Required: false, Help: "server the bot should connect to"})
+	var portArg *string = parser.String("p", "port",
+											&argparse.Options{Required: false, 
+																Help: "port that should be used to connecto to the server"})
+	err := parser.Parse(os.Args)
+	if err != nil {
+		fmt.Print(parser.Usage(err))
+		os.Exit(1)
+	}
+	if (*nickArg != "") {
+		opts.nick = *nickArg
+	}
+	if (*chanArg != "") {
+		opts.channel = *chanArg
+	}
+	if (*serverArg != "") {
+		opts.server = *serverArg
+	}
+	if (*portArg != "") {
+		opts.port = *portArg
+	}
 
 	// create config and adjust settings
-	config := irc.NewConfig(nickArg)
+	config := irc.NewConfig(opts.nick)
 	config.SSL = true
-	config.SSLConfig = &tls.Config{ServerName: serverArg}
-	config.Server = serverArg + ":" + portArg
+	config.SSLConfig = &tls.Config{ServerName: opts.server}
+	config.Server = opts.server + ":" + opts.port
 	config.NewNick = func(n string) string {return n + "^" }
 
 	// create the client
@@ -60,8 +98,7 @@ func main() {
 
 func joinOnConnect(conn *irc.Conn, line *irc.Line) {
 	fmt.Printf(conn.String())
-	channelArg := "#botwar"
-	conn.Join(channelArg)
+	conn.Join(opts.channel)
 }
 
 func handlePrivMsg(conn *irc.Conn, line *irc.Line) {
